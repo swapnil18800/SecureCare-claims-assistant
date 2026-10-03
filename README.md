@@ -3,6 +3,25 @@
 A Streamlit app for **health-insurance reimbursement claim intake**, powered by a **LangGraph** workflow.
 Built as the class project for the *FDE LangGraph* sessions: collect → validate → run the graph → deploy.
 
+**Live demo:** [swapnildemosecurecares.streamlit.app](https://swapnildemosecurecares.streamlit.app/)
+
+| Home | Claim processed |
+|------|-----------------|
+| ![Home](assets/images/home.png) | ![Claim processed](assets/images/claim_processed.png) |
+
+<details>
+<summary>More screenshots</summary>
+
+**Demo policies**
+
+![Demo policies](assets/images/demo_policies.png)
+
+**App with terminal logs**
+
+![App with logs](assets/images/app_with_logs.png)
+
+</details>
+
 * Validated form (inline alerts on every field, conditional sections, repeating bill rows)
 * LangGraph workflow: eligibility → calculation → document check → status → AI-drafted letters → verification
 * Optional AI (OpenRouter / DeepSeek / OpenAI): email autofill + letters. **Works without a key** (template letters)
@@ -113,6 +132,8 @@ pytest
 ```
 
 ## Deploy on Streamlit Community Cloud
+
+The live deployment is at **https://swapnildemosecurecares.streamlit.app/**.
 
 1. **Push to GitHub**
    ```bash
