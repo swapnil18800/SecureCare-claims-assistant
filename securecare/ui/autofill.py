@@ -12,8 +12,11 @@ from securecare.agents.llm import build_llm
 from securecare.config import (
     ADMISSION_TYPES, BILL_CATEGORIES, MAX_BILL_ITEMS, MAX_FREE_TEXT_CHARS, RELATIONSHIPS,
 )
+from securecare.logs import get_logger
 from securecare.security import looks_like_api_key, redact_secrets
 from securecare.ui.sidebar import Settings, flush_key_after_use, resolve_api_key
+
+log = get_logger("autofill")
 
 
 def _iso(value: Any) -> date | None:
@@ -87,9 +90,11 @@ def render_autofill(settings: Settings) -> None:
             st.error("That does not look like an API key (it should start with 'sk-').")
             return
         try:
+            log.info("autofill: extracting from %d characters of text", len(text))
             with st.spinner("Reading your message…"):
                 extraction = extract_claim_from_text(build_llm(key, settings.model, provider=settings.provider), text)
         except Exception as exc:  # noqa: BLE001
+            log.warning("autofill failed: %s", redact_secrets(f"{type(exc).__name__}: {exc}")[:250])
             st.error(f"AI call failed: {redact_secrets(f'{type(exc).__name__}: {exc}')[:250]}")
             return
         finally:
@@ -97,6 +102,7 @@ def render_autofill(settings: Settings) -> None:
             flush_key_after_use(settings)              # and wipe the widget that held it
 
         count = apply_extraction(extraction)
+        log.info("autofill: filled %d field(s), %d missing", count, len(extraction.missing_information))
         missing = ", ".join(extraction.missing_information) or "nothing"
         st.session_state["flash"] = {"kind": "success", "text":
                                      f"Filled {count} field(s) from your message. Still missing: {missing}. "

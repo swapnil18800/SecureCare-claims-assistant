@@ -23,6 +23,7 @@ securecare-claims/
 │   ├── schemas.py               # Pydantic models + field validators (the FORM schema)
 │   ├── validation.py            # form -> {widget_key: error}; business rules vs policy store
 │   ├── security.py              # key-shape check, secret redaction
+│   ├── logs.py                  # terminal logging (no keys, no claim details)
 │   ├── formatting.py            # ₹ formatting
 │   ├── samples.py               # sample claims (relative dates)
 │   ├── services/
@@ -97,6 +98,12 @@ Structured output uses tool calling, because DeepSeek does not support OpenAI's 
 
 To skip typing a key **locally**, copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml`
 and fill in `OPENROUTER_API_KEY` or `DEEPSEEK_API_KEY`. A key typed in the sidebar still wins.
+
+### Logs
+
+The terminal running `streamlit run` shows each workflow step, every LLM call (provider, model,
+duration, tokens) and errors. API keys and claim details (names, diagnosis, email text, letters)
+are never logged. More or less detail: `SECURECARE_LOG_LEVEL=DEBUG streamlit run app.py` (or `WARNING`).
 
 Run the tests (no network or API key needed; your `secrets.toml` is ignored by the tests):
 

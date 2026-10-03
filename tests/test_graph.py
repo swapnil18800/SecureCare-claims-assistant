@@ -119,3 +119,15 @@ def test_graph_state_never_contains_the_api_key():
         def with_structured_output(self, schema): raise RuntimeError("boom " + secret)
     s = _run(sample_raw_claim(), llm=Holder()).state
     assert secret not in str(s)
+
+
+def test_workflow_steps_are_logged(caplog):
+    caplog.set_level("INFO", logger="securecare")
+    s = _run(sample_raw_claim()).state
+    assert "workflow finished" in caplog.text and s["claim_id"] in caplog.text
+
+
+def test_llm_failure_is_logged_without_the_key(caplog):
+    caplog.set_level("INFO", logger="securecare")
+    _run(sample_raw_claim(), llm=FakeLLM([RuntimeError("Incorrect API key provided: sk-proj-ABCDEFGHIJKLMNOP1234")]))
+    assert "LLM failed" in caplog.text and "sk-proj-ABCDEFGHIJKLMNOP1234" not in caplog.text

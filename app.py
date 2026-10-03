@@ -13,6 +13,7 @@ import streamlit as st
 from securecare.agents.llm import build_llm
 from securecare.config import APP_TAGLINE, APP_TITLE
 from securecare.graph import build_claim_graph, build_initial_state, run_claim
+from securecare.logs import get_logger
 from securecare.security import looks_like_api_key, redact_secrets
 from securecare.ui.autofill import render_autofill
 from securecare.ui.form import load_sample, render_claim_form, reset_form
@@ -21,6 +22,7 @@ from securecare.ui.sidebar import flush_key_after_use, render_sidebar, resolve_a
 from securecare.ui.workflow_tab import render_about_tab, render_workflow_tab
 
 st.set_page_config(page_title=APP_TITLE, page_icon="🏥", layout="wide")
+log = get_logger("app")
 
 settings = render_sidebar()
 
@@ -46,6 +48,7 @@ with tab_claim:
     if st.button("Submit claim", type="primary"):
         st.session_state["show_all_errors"] = True
         if not result.ok:
+            log.info("submit blocked: %d field error(s)", len(result.errors))
             st.session_state["flash"] = {"kind": "error", "text":
                                          f"Please fix {len(result.errors)} highlighted field(s) before submitting."}
             st.rerun()
@@ -55,6 +58,7 @@ with tab_claim:
             if api_key and looks_like_api_key(api_key):
                 llm = build_llm(api_key, settings.model, provider=settings.provider)        # fresh client, never cached
             elif api_key:
+                log.warning("submit: key has the wrong shape, AI drafting skipped")
                 notice = "The key you entered does not look like an API key, so AI drafting was skipped."
             api_key = ""                                        # drop our reference to the secret
 
@@ -64,6 +68,7 @@ with tab_claim:
                     run = run_claim(graph, build_initial_state(result.submission, use_llm=llm is not None))
                 st.session_state["last_run"] = run
             except Exception as exc:  # noqa: BLE001
+                log.exception("workflow error: %s", redact_secrets(f"{type(exc).__name__}: {exc}")[:250])
                 st.error(f"Workflow error: {redact_secrets(f'{type(exc).__name__}: {exc}')[:250]}")
                 run = None
             finally:

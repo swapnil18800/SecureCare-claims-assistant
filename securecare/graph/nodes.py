@@ -19,7 +19,10 @@ from securecare.config import (
     LONG_STAY_DAYS, MAX_LLM_ATTEMPTS, WAITING_PERIOD_DAYS,
 )
 from securecare.graph.state import ClaimState
+from securecare.logs import get_logger
 from securecare.security import redact_secrets
+
+log = get_logger("graph.nodes")
 from securecare.services.policy_store import get_policy
 
 VALID_STATUSES = {"rejected", "pending_documents", "officer_review", "ready_for_review"}
@@ -185,6 +188,7 @@ def make_draft_communications(llm: Optional[Any]) -> Callable[[ClaimState], Dict
         except Exception as exc:  # noqa: BLE001 - any LLM/network/auth failure must not crash the claim
             comms = template_communications(state)
             message = redact_secrets(f"{type(exc).__name__}: {exc}")[:300]
+            log.warning("draft_communications: LLM failed, using template: %s", message)
             return {"officer_summary": comms.officer_summary, "claimant_letter": comms.claimant_letter,
                     "comms_source": "template", "comms_attempts": MAX_LLM_ATTEMPTS,
                     "comms_error": message,
