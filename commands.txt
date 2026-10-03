@@ -1,0 +1,79 @@
+python -m venv venv | python3 -m venv venv
+
+ 
+
+source /Users/vinaykumar/Downloads/securecare-claims/venv/bin/activate
+
+ 
+
+pip install -r requirements.txt 
+
+ 
+
+streamlit run app.py 
+
+ 
+
+Create a Git repo
+
+ 
+
+In Local:
+
+git status
+
+ 
+
+git init
+
+ 
+
+Check gitognore is proper or not , vent should be ignored
+
+ 
+
+git add . 
+
+ 
+
+git commit -m "first commit"
+
+ 
+
+git remote add origin https://github.com/vinay2k2/claims.git
+
+ 
+
+git branch -M main
+
+ 
+
+git push -u origin main
+
+ 
+
+Now Link in streamline community and make it live: Observe the build
+
+ 
+
+Now in local make some changes
+
+ 
+
+git add .
+
+ 
+
+git commit -m "Capitalized  commit"
+
+ 
+
+git push -u origin main
+
+ 
+
+Observe the changes getting pulled
+
+
+
+
